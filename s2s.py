@@ -223,19 +223,15 @@ def test_bleu(count):
 
         total_score = 0.0
         for i in tqdm(range(count)):
-            # 随机选择一个要训练的bucket_id
             random_number = np.random.random_sample()
             bucket_id = min([
                 i for i in range(len(buckets_scale))
                 if buckets_scale[i] > random_number
             ])
-            # 拿出64个问答对  data, data_in 问答倒转
             data, _ = model.get_batch_data(
                 bucket_dbs,
                 bucket_id
             )
-            # 将问答对转换为模型训练可接受的格式
-            # bucket_10_20这个bucket对应的维度为：10*64 20*64 20*64
             encoder_inputs, decoder_inputs, decoder_weights = model.get_batch(
                 bucket_dbs,
                 bucket_id,
@@ -272,11 +268,8 @@ def test():
         def random(self):
             return sentence, ''
     with tf.Session() as sess:
-        #　构建模型
         model = create_model(sess, True)
         model.batch_size = 1
-        # 初始化变量
-        
         sess.run(tf.global_variables_initializer())
         model.saver.restore(sess, os.path.join(FLAGS.model_dir, FLAGS.model_name))
         sys.stdout.write("> ")
@@ -288,7 +281,6 @@ def test():
                 b for b in range(len(buckets))
                 if buckets[b][0] > len(sentence)
             ])
-            #输入句子处理
             data, _ = model.get_batch_data(
                 {bucket_id: TestBucket(sentence)},
                 bucket_id
@@ -314,11 +306,11 @@ def test():
             sentence = sys.stdin.readline()
 
 def main(_):
-    #if FLAGS.bleu > -1:
-        #test_bleu(FLAGS.bleu)
-    #elif FLAGS.test:
-        #test()
-    #else:
+    if FLAGS.bleu > -1:
+        test_bleu(FLAGS.bleu)
+    elif FLAGS.test:
+        test()
+    else:
         train()
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ class S2SModel(object):
                 size, # 512 LSTM每层神经元数量
                 dropout, # 1.0 每层输出DROPOUT的大小
                 num_layers, # 2 LSTM的层数
-                max_gradient_norm, # 5.0 梯度最大阈值
+                max_gradient_norm, # 5.0 梯度裁剪 梯度阈值
                 batch_size,  # 64 批量梯度下降的批量大小
                 learning_rate,  # 0.0003 学习率
                 num_samples, # 512 分批softmax的样本量
@@ -57,8 +57,6 @@ class S2SModel(object):
 
             def sampled_loss(labels, logits):
                 labels = tf.reshape(labels, [-1, 1])
-                # 因为选项有选fp16的训练，这里统一转换为fp32
-                # tf.cast 即数据格式转
                 local_w_t = tf.cast(w_t, tf.float32)
                 local_b = tf.cast(b, tf.float32)
                 local_inputs = tf.cast(logits, tf.float32)
@@ -158,16 +156,6 @@ class S2SModel(object):
             #per_example_loss: 如果为真，则调用sequence_loss_by_example，返回一个列表，其每个元素就是一个样本的loss值。如果为假，则调用sequence_loss函数，对一个batch的样本只返回一个求和的loss值，具体见后面的分析
             #name: Optional name for this operation, defaults to "model_with_buckets".            
             
-            #def model_with_buckets(encoder_inputs,
-                               #decoder_inputs,
-                               #targets,
-                               #weights,
-                               #buckets,
-                               #seq2seq,
-                               #softmax_loss_function=None,
-                               #per_example_loss=False,
-                               #name=None):            
-            
             self.outputs, self.losses = tf.contrib.legacy_seq2seq.model_with_buckets(
                 self.encoder_inputs,
                 self.decoder_inputs,
@@ -204,17 +192,7 @@ class S2SModel(object):
             #seq2seq:        定义好的seq2seq模型，可以使用后面介绍的embedding_attention_seq2seq，embedding_rnn_seq2seq，basic_rnn_seq2seq等
             #softmax_loss_function: 计算误差的函数，(labels, logits)，默认为sparse_softmax_cross_entropy_with_logits
             #per_example_loss: 如果为真，则调用sequence_loss_by_example，返回一个列表，其每个元素就是一个样本的loss值。如果为假，则调用sequence_loss函数，对一个batch的样本只返回一个求和的loss值，具体见后面的分析
-            #name: Optional name for this operation, defaults to "model_with_buckets".   
-            
-            #tf.contrib.legacy_seq2seq.model_with_buckets(encoder_inputs, 
-                                                        #decoder_inputs, 
-                                                        #targets, 
-                                                        #weights, 
-                                                        #buckets, 
-                                                        #seq2seq, 
-                                                        #softmax_loss_function=None, 
-                                                        #per_example_loss=False, 
-                                                        #name=None)
+            #name: Optional name for this operation, defaults to "model_with_buckets".  
             
             self.outputs, self.losses = tf.contrib.legacy_seq2seq.model_with_buckets(
                 self.encoder_inputs,
