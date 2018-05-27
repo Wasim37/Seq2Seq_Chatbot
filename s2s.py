@@ -83,7 +83,7 @@ tf.app.flags.DEFINE_integer(
 )
 tf.app.flags.DEFINE_boolean(
     'test',
-    False,
+    True,
     '是否在测试'
 )
 
@@ -112,8 +112,7 @@ def create_model(session, forward_only):
 
 def train():
     """训练模型"""
-    # 准备数据
-    print('准备数据')
+    print('数据准备中...')
     bucket_dbs = data_utils.read_bucket_dbs(FLAGS.buckets_dir)
     bucket_sizes = []
     for i in range(len(buckets)):
@@ -122,16 +121,13 @@ def train():
         print('bucket {} 中有数据 {} 条'.format(i, bucket_size))
     total_size = sum(bucket_sizes)
     print('共有数据 {} 条'.format(total_size))
-    # 开始建模与训练
+    
     with tf.Session() as sess:
-        #　构建模型
         model = create_model(sess, False)
-        # 初始化变量
         sess.run(tf.global_variables_initializer())
         # 计算每个文件数据占比
         buckets_scale = [sum(bucket_sizes[:i + 1]) / total_size for i in range(len(bucket_sizes))]
-        # 开始训练
-        # 定义格式化输出
+        # 格式化控制台输出
         metrics = '  '.join([
             '\r[{}]',
             '{:.1f}%',
@@ -200,8 +196,8 @@ def test_bleu(count):
     """测试bleu"""
     from nltk.translate.bleu_score import sentence_bleu
     from tqdm import tqdm
-    # 准备数据
-    print('准备数据')
+    
+    print('数据准备中...')
     bucket_dbs = data_utils.read_bucket_dbs(FLAGS.buckets_dir)
     bucket_sizes = []
     for i in range(len(buckets)):
@@ -210,6 +206,7 @@ def test_bleu(count):
         print('bucket {} 中有数据 {} 条'.format(i, bucket_size))
     total_size = sum(bucket_sizes)
     print('共有数据 {} 条'.format(total_size))
+    
     # bleu设置0的话，默认对所有样本采样
     if count <= 0:
         count = total_size
@@ -217,11 +214,10 @@ def test_bleu(count):
         sum(bucket_sizes[:i + 1]) / total_size
         for i in range(len(bucket_sizes))
     ]
+    
     with tf.Session() as sess:
-        #　构建模型
         model = create_model(sess, True)
         model.batch_size = 1
-        # 初始化变量
         sess.run(tf.initialize_all_variables())
         model.saver.restore(sess, os.path.join(FLAGS.model_dir, FLAGS.model_name))
 
@@ -318,13 +314,11 @@ def test():
             sentence = sys.stdin.readline()
 
 def main(_):
-    # 是否测试bleu
-    if FLAGS.bleu > -1:
-        test_bleu(FLAGS.bleu)
-    # 是否在测试
-    elif FLAGS.test:
-        test()
-    else:
+    #if FLAGS.bleu > -1:
+        #test_bleu(FLAGS.bleu)
+    #elif FLAGS.test:
+        #test()
+    #else:
         train()
 
 if __name__ == '__main__':
