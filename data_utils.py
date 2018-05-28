@@ -19,10 +19,10 @@ def with_path(p):
     return os.path.join(current_dir, p)
 
 DICTIONARY_PATH = 'db/dictionary.json'
-EOS = '<eos>' #结束标记
-UNK = '<unk>' #未登录词
+GO = '<go>' #解码器端的句子起始标识符
+EOS = '<eos>' #解码器端的句子结束标识符
+UNK = '<unk>' #低频词或者一些未遇到过的词等
 PAD = '<pad>' #用于填充
-GO = '<go>' #开始标记
 
 # 我一般是逗号放到句子后面的……
 # 不过这样比较方便屏蔽某一行，如果是JS就不用这样了，因为JS的JSON语法比较松，允许多余逗号
@@ -135,7 +135,7 @@ def read_bucket_dbs(buckets_dir):
     return ret
 
 def sentence_indice(sentence):
-    '''从字典中查询出sentence中的每个字的id
+    '''把输入句子转化为字典里的id位置
     '''
     ret = []
     for  word in sentence:

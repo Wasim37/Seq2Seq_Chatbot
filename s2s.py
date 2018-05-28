@@ -306,11 +306,11 @@ def test():
             sentence = sys.stdin.readline()
 
 def main(_):
-    if FLAGS.bleu > -1:
-        test_bleu(FLAGS.bleu)
-    elif FLAGS.test:
-        test()
-    else:
+    #if FLAGS.bleu > -1:
+        #test_bleu(FLAGS.bleu)
+    #elif FLAGS.test:
+        #test()
+    #else:
         train()
 
 if __name__ == '__main__':
